@@ -1,7 +1,7 @@
 import express from 'express';
 import { query, getOne, getAll } from '../database/init.js';
 import { authenticateToken } from './auth.js';
-import { generatePDF } from '../services/pdfGenerator.js';
+import { generatePDF } from '../services/pdfGeneratorSimple.js';
 import { sendQuoteEmail } from '../services/emailService.js';
 
 const router = express.Router();
