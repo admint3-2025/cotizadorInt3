@@ -1,55 +1,16 @@
-# Use Debian base with Node.js
-FROM node:20-bookworm
-
-# Install dependencies and download Chrome directly from Google
-RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcairo2 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libgbm1 \
-    libglib2.0-0 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libpango-1.0-0 \
-    libx11-6 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxrandr2 \
-    libxss1 \
-    libxtst6 \
-    ca-certificates \
-    --no-install-recommends \
-    && echo "Descargando Chrome..." \
-    && wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && echo "Instalando Chrome..." \
-    && apt-get install -y ./google-chrome-stable_current_amd64.deb \
-    && echo "Limpiando..." \
-    && rm google-chrome-stable_current_amd64.deb \
-    && rm -rf /var/lib/apt/lists/* \
-    && echo "Verificando instalación..." \
-    && google-chrome --version \
-    && echo "Listando ejecutables de Chrome..." \
-    && ls -la /usr/bin/ | grep -i chrome || echo "No chrome binaries found"
+# Use official Puppeteer image with Chrome pre-installed
+FROM ghcr.io/puppeteer/puppeteer:22.0.0
 
 # Set working directory
 WORKDIR /usr/src/app
 
+# Switch to root to install dependencies
+USER root
+
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (skip Puppeteer's Chromium download)
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+# Install dependencies
 RUN npm ci && npm cache clean --force
 
 # Copy application files
@@ -57,6 +18,9 @@ COPY . .
 
 # Build the frontend
 RUN npm run build
+
+# Switch back to pptruser for security
+USER pptruser
 
 # Expose port
 EXPOSE 10000

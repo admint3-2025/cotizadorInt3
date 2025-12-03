@@ -349,41 +349,8 @@ export async function generatePDF(quote) {
 
   console.log('🌐 Iniciando navegador...');
   
-  // Detectar la ruta del ejecutable de Chrome
-  const { execSync } = await import('child_process');
-  let executablePath;
-  
-  try {
-    // Intentar encontrar Chrome
-    const possibleCommands = [
-      'which google-chrome',
-      'which google-chrome-stable', 
-      'which chromium',
-      'which chromium-browser'
-    ];
-    
-    for (const cmd of possibleCommands) {
-      try {
-        executablePath = execSync(cmd, { encoding: 'utf8' }).trim();
-        if (executablePath) {
-          console.log('✅ Chrome encontrado en:', executablePath);
-          break;
-        }
-      } catch (e) {
-        // Continuar con el siguiente comando
-      }
-    }
-  } catch (error) {
-    console.log('⚠️  No se pudo detectar Chrome automáticamente');
-  }
-  
-  if (!executablePath) {
-    console.log('❌ Chrome no encontrado, intentando sin executablePath');
-  }
-  
   const browser = await puppeteer.launch({
     headless: 'new',
-    executablePath,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
