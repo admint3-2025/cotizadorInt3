@@ -41,7 +41,7 @@ COPY package*.json ./
 
 # Install dependencies and Puppeteer Chrome
 RUN npm ci && \
-    npx puppeteer browsers install chrome && \
+    PUPPETEER_CACHE_DIR=/usr/src/app/.cache/puppeteer npx puppeteer browsers install chrome && \
     npm cache clean --force
 
 # Copy application files
