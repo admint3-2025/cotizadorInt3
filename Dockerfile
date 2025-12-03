@@ -30,11 +30,17 @@ RUN apt-get update && apt-get install -y \
     libxtst6 \
     ca-certificates \
     --no-install-recommends \
+    && echo "Descargando Chrome..." \
     && wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && echo "Instalando Chrome..." \
     && apt-get install -y ./google-chrome-stable_current_amd64.deb \
+    && echo "Limpiando..." \
     && rm google-chrome-stable_current_amd64.deb \
     && rm -rf /var/lib/apt/lists/* \
-    && google-chrome --version
+    && echo "Verificando instalación..." \
+    && google-chrome --version \
+    && echo "Listando ejecutables de Chrome..." \
+    && ls -la /usr/bin/ | grep -i chrome || echo "No chrome binaries found"
 
 # Set working directory
 WORKDIR /usr/src/app
