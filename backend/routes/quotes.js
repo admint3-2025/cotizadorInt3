@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
     const includeDeleted = req.query.includeDeleted === 'true';
     
     const query = includeDeleted 
-      $1 `SELECT q.*, u.username as created_by_username, u.full_name as created_by_name,
+      ? `SELECT q.*, u.username as created_by_username, u.full_name as created_by_name,
                 d.username as deleted_by_username, d.full_name as deleted_by_name
          FROM quotes q
          LEFT JOIN users u ON q.created_by = u.id
