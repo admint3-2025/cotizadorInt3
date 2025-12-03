@@ -1,0 +1,198 @@
+import sqlite3 from 'sqlite3';
+import bcrypt from 'bcryptjs';
+
+const db = new sqlite3.Database('integrational.db');
+
+// Promisificar operaciones de base de datos
+const dbRun = (sql, params = []) => {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function(err) {
+      if (err) reject(err);
+      else resolve({ lastID: this.lastID, changes: this.changes });
+    });
+  });
+};
+
+const dbGet = (sql, params = []) => {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
+};
+
+const dbAll = (sql, params = []) => {
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
+};
+
+export async function initDatabase() {
+  // Tabla de usuarios
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      email TEXT NOT NULL,
+      full_name TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Tabla de clientes
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS clients (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      company TEXT,
+      email TEXT NOT NULL,
+      phone TEXT,
+      address TEXT,
+      city TEXT,
+      state TEXT,
+      zip_code TEXT,
+      rfc TEXT,
+      contact_person TEXT,
+      notes TEXT,
+      created_by INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (created_by) REFERENCES users(id)
+    )
+  `);
+
+  // Tabla de productos y servicios
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS products (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      description TEXT,
+      category TEXT,
+      unit_price REAL NOT NULL,
+      cost REAL,
+      stock INTEGER DEFAULT 0,
+      unit TEXT DEFAULT 'Pieza',
+      is_service INTEGER DEFAULT 0,
+      is_active INTEGER DEFAULT 1,
+      tax_rate REAL DEFAULT 16.0,
+      notes TEXT,
+      created_by INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (created_by) REFERENCES users(id)
+    )
+  `);
+
+  // Tabla de cotizaciones
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS quotes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      folio TEXT UNIQUE NOT NULL,
+      client_id INTEGER,
+      client_name TEXT NOT NULL,
+      client_company TEXT,
+      client_email TEXT NOT NULL,
+      client_phone TEXT,
+      client_address TEXT,
+      items TEXT NOT NULL,
+      subtotal REAL NOT NULL,
+      tax REAL NOT NULL,
+      total REAL NOT NULL,
+      notes TEXT,
+      validity_days INTEGER DEFAULT 15,
+      delivery_time TEXT,
+      payment_terms TEXT,
+      template_type INTEGER DEFAULT 1,
+      created_by INTEGER NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      sent_at DATETIME,
+      deleted_at DATETIME,
+      deleted_by INTEGER,
+      deletion_reason TEXT,
+      FOREIGN KEY (created_by) REFERENCES users(id),
+      FOREIGN KEY (client_id) REFERENCES clients(id),
+      FOREIGN KEY (deleted_by) REFERENCES users(id)
+    )
+  `);
+
+  // Tabla de auditoría de cotizaciones eliminadas
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS quotes_audit (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      quote_id INTEGER NOT NULL,
+      folio TEXT NOT NULL,
+      client_name TEXT NOT NULL,
+      client_company TEXT,
+      client_email TEXT NOT NULL,
+      total REAL NOT NULL,
+      created_by INTEGER,
+      created_by_name TEXT,
+      created_at DATETIME,
+      deleted_at DATETIME NOT NULL,
+      deleted_by INTEGER NOT NULL,
+      deleted_by_name TEXT,
+      deletion_reason TEXT,
+      full_data TEXT NOT NULL
+    )
+  `);
+
+  // Agregar columnas de eliminación si no existen (migración)
+  try {
+    await dbRun(`ALTER TABLE quotes ADD COLUMN deleted_at DATETIME`);
+    console.log('✅ Columna deleted_at agregada');
+  } catch (e) {
+    // La columna ya existe
+  }
+
+  try {
+    await dbRun(`ALTER TABLE quotes ADD COLUMN deleted_by INTEGER`);
+    console.log('✅ Columna deleted_by agregada');
+  } catch (e) {
+    // La columna ya existe
+  }
+
+  try {
+    await dbRun(`ALTER TABLE quotes ADD COLUMN deletion_reason TEXT`);
+    console.log('✅ Columna deletion_reason agregada');
+  } catch (e) {
+    // La columna ya existe
+  }
+
+  // Migración: Agregar client_id si no existe
+  try {
+    await dbRun(`ALTER TABLE quotes ADD COLUMN client_id INTEGER`);
+    console.log('✅ Columna client_id agregada a quotes');
+  } catch (e) {
+    // La columna ya existe
+  }
+
+  // Crear usuario por defecto si no existe
+  const userExists = await dbGet('SELECT id FROM users WHERE username = ?', ['admin']);
+  
+  if (!userExists) {
+    const hashedPassword = bcrypt.hashSync('admin123', 10);
+    await dbRun(
+      'INSERT INTO users (username, password, email, full_name) VALUES (?, ?, ?, ?)',
+      ['admin', hashedPassword, 'administracion@integrational3.com.mx', 'Administrador']
+    );
+    
+    console.log('✅ Usuario administrador creado: admin / admin123');
+  } else {
+    // Actualizar email del admin si es el antiguo
+    await dbRun(
+      'UPDATE users SET email = ? WHERE username = ? AND email = ?',
+      ['administracion@integrational3.com.mx', 'admin', 'admin@integracional3.com.mx']
+    );
+  }
+
+  console.log('✅ Base de datos inicializada');
+}
+
+export { dbRun, dbGet, dbAll };
+export default db;
