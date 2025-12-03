@@ -1,4 +1,5 @@
 import PDFDocument from 'pdfkit';
+import fetch from 'node-fetch';
 
 function formatCurrency(amount) {
   return '$' + parseFloat(amount).toLocaleString('es-MX', {
@@ -8,7 +9,7 @@ function formatCurrency(amount) {
 }
 
 export async function generatePDF(quote) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       const items = JSON.parse(quote.items);
       const date = new Date(quote.created_at).toLocaleDateString('es-MX');
@@ -25,12 +26,21 @@ export async function generatePDF(quote) {
          .rect(0, 0, doc.page.width, 120)
          .fill();
       
-      doc.fillColor('white')
-         .fontSize(28)
-         .font('Helvetica-Bold')
-         .text('INTEGRATIONAL 3', 50, 35);
+      // Descargar y agregar logo
+      try {
+        const logoResponse = await fetch('https://integrational3.com.mx/logorigen/integrational_std2_white.png');
+        const logoBuffer = await logoResponse.buffer();
+        doc.image(logoBuffer, 50, 25, { width: 200 });
+      } catch (error) {
+        console.log('No se pudo cargar el logo, usando texto');
+        doc.fillColor('white')
+           .fontSize(28)
+           .font('Helvetica-Bold')
+           .text('INTEGRATIONAL 3', 50, 35);
+      }
       
-      doc.fontSize(10)
+      doc.fillColor('white')
+         .fontSize(10)
          .font('Helvetica')
          .text('administracion@integrational3.com.mx', 50, 70)
          .text('Tel: (449) 356 - 6356', 50, 85);
