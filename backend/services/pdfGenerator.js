@@ -348,6 +348,31 @@ export async function generatePDF(quote) {
   `;
 
   console.log('🌐 Iniciando navegador...');
+  
+  // Intentar encontrar el ejecutable de Chrome/Chromium
+  const fs = await import('fs');
+  const possiblePaths = [
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/google-chrome',
+    process.env.PUPPETEER_EXECUTABLE_PATH,
+    process.env.CHROME_BIN
+  ].filter(Boolean);
+  
+  let executablePath = undefined;
+  for (const path of possiblePaths) {
+    if (fs.existsSync(path)) {
+      executablePath = path;
+      console.log('✅ Chrome encontrado en:', path);
+      break;
+    }
+  }
+  
+  if (!executablePath) {
+    console.log('⚠️  No se encontró Chrome, usando Chromium bundled de Puppeteer');
+  }
+  
   const browser = await puppeteer.launch({
     headless: 'new',
     args: [
@@ -358,7 +383,7 @@ export async function generatePDF(quote) {
       '--disable-software-rasterizer',
       '--disable-extensions'
     ],
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium'
+    executablePath
   });
   
   console.log('📃 Generando página...');
