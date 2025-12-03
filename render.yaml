@@ -12,11 +12,11 @@ services:
   # Web Service (Backend + Frontend)
   - type: web
     name: integrational-app
-    env: node
+    env: docker
     plan: free
     region: oregon
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     envVars:
       - key: NODE_ENV
         value: production
