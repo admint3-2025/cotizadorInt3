@@ -4,7 +4,7 @@ FROM node:20-bookworm
 # Install Chromium from system packages
 RUN apt-get update && apt-get install -y \
     chromium \
-    chromium-sandbox \
+    chromium-driver \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
@@ -30,7 +30,9 @@ RUN apt-get update && apt-get install -y \
     libxtst6 \
     ca-certificates \
     --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && which chromium || echo "Chromium not found!" \
+    && ls -la /usr/bin/chromium* || echo "No chromium executables found"
 
 # Set working directory
 WORKDIR /usr/src/app
