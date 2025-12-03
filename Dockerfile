@@ -33,6 +33,9 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /usr/src/app
 
+# Set Puppeteer cache directory to a location within the app
+ENV PUPPETEER_CACHE_DIR=/usr/src/app/.cache/puppeteer
+
 # Copy package files
 COPY package*.json ./
 
