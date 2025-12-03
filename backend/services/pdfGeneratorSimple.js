@@ -330,11 +330,36 @@ export async function generatePDF(quote) {
       bankY += 18;
       doc.text(`• Esta cotización tiene una vigencia de ${quote.validity_days} días`, 60, bankY);
       
+      // Políticas y términos
+      bankY += 40;
+      doc.fontSize(10)
+         .fillColor('#0066cc')
+         .font('Helvetica-Bold')
+         .text('Políticas Comerciales:', 60, bankY);
+      
+      bankY += 20;
+      doc.fontSize(8)
+         .fillColor('#444')
+         .font('Helvetica');
+      
+      const policies = [
+        '1. Los tiempos de entrega e inicio de servicio corren a partir de la comprobación del pago del anticipo o su totalidad dentro de las 24 a 48 horas.',
+        '2. Enviar por favor el comprobante de pago a administracion@integrational3.com.mx.',
+        '3. Para facturar, enviar Constancia de Situación Fiscal y comprobante el mismo día.',
+        '4. No se aceptan cancelaciones ni devoluciones en servicios, licencias o pedidos especiales.',
+        '5. Precios sujetos a cambio sin previo aviso hasta confirmar el pago, debido a variaciones en tipo de cambio.'
+      ];
+      
+      policies.forEach(policy => {
+        doc.text(policy, 60, bankY, { width: 480, align: 'justify' });
+        bankY += doc.heightOfString(policy, { width: 480 }) + 8;
+      });
+      
       // Nota de agradecimiento
       doc.fontSize(10)
          .fillColor('#666')
          .font('Helvetica-Oblique')
-         .text('Gracias por su preferencia. Para cualquier duda o aclaración, no dude en contactarnos.', 50, 450, {
+         .text('Gracias por su preferencia. Para cualquier duda o aclaración, no dude en contactarnos.', 50, bankY + 20, {
            width: 500,
            align: 'center'
          });
