@@ -33,7 +33,7 @@ export async function generatePDF(quote) {
       doc.fontSize(10)
          .font('Helvetica')
          .text('administracion@integrational3.com.mx', 50, 70)
-         .text('Tel: (123) 456-7890', 50, 85);
+         .text('Tel: (449) 356 - 6356', 50, 85);
 
       // Caja de folio (derecha)
       doc.fillColor('#f8f9fa')
@@ -154,11 +154,12 @@ export async function generatePDF(quote) {
            .text(item.quantity, 360, yPos, { width: 40, align: 'center' });
         
         // Precio unitario
-        doc.text(formatCurrency(item.price), 410, yPos, { width: 70, align: 'right' });
+        const unitPrice = parseFloat(item.unit_price || item.price || 0);
+        doc.text(formatCurrency(unitPrice), 410, yPos, { width: 70, align: 'right' });
         
         // Total
         doc.font('Helvetica-Bold')
-           .text(formatCurrency(item.quantity * item.price), 490, yPos, { width: 50, align: 'right' });
+           .text(formatCurrency(item.quantity * unitPrice), 490, yPos, { width: 50, align: 'right' });
         
         // Descripción
         if (item.description) {
