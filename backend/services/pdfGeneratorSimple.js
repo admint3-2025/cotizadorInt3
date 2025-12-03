@@ -20,149 +20,275 @@ export async function generatePDF(quote) {
       doc.on('end', () => resolve(Buffer.concat(chunks)));
       doc.on('error', reject);
 
-      // Header
+      // Header azul con logo
       doc.fillColor('#0066cc')
-         .rect(0, 0, doc.page.width, 100)
+         .rect(0, 0, doc.page.width, 120)
          .fill();
       
       doc.fillColor('white')
-         .fontSize(24)
+         .fontSize(28)
          .font('Helvetica-Bold')
-         .text('INTEGRATIONAL 3', 50, 30);
+         .text('INTEGRATIONAL 3', 50, 35);
+      
+      doc.fontSize(10)
+         .font('Helvetica')
+         .text('administracion@integrational3.com.mx', 50, 70)
+         .text('Tel: (123) 456-7890', 50, 85);
+
+      // Caja de folio (derecha)
+      doc.fillColor('#f8f9fa')
+         .rect(400, 140, 150, 80)
+         .fill()
+         .strokeColor('#dee2e6')
+         .rect(400, 140, 150, 80)
+         .stroke();
+      
+      doc.fillColor('#0066cc')
+         .fontSize(12)
+         .font('Helvetica-Bold')
+         .text('COTIZACIÓN', 410, 150);
+      
+      doc.fillColor('black')
+         .fontSize(14)
+         .text(quote.folio, 410, 170);
       
       doc.fontSize(9)
          .font('Helvetica')
-         .text('administracion@integrational3.com.mx', 50, 60)
-         .text('Tel: (123) 456-7890', 50, 75);
+         .fillColor('#666')
+         .text(`Fecha: ${date}`, 410, 195);
 
-      // Folio
-      doc.fillColor('black')
-         .fontSize(20)
-         .font('Helvetica-Bold')
-         .text(`COTIZACIÓN ${quote.folio}`, 50, 120);
-      
-      doc.fontSize(10)
-         .font('Helvetica')
-         .text(`Fecha: ${date}`, 50, 150)
-         .text(`Vigencia: ${quote.validity_days} días`, 50, 165);
-
-      // Cliente
+      // Información del cliente (izquierda)
       doc.fontSize(12)
          .font('Helvetica-Bold')
-         .text('CLIENTE:', 50, 200);
+         .fillColor('#0066cc')
+         .text('DATOS DEL CLIENTE', 50, 150);
       
-      doc.fontSize(10)
-         .font('Helvetica')
-         .text(quote.client_name, 50, 220);
+      // Caja del cliente
+      doc.fillColor('#f8f9fa')
+         .rect(50, 170, 330, 100)
+         .fill()
+         .strokeColor('#dee2e6')
+         .rect(50, 170, 330, 100)
+         .stroke();
       
+      let clientY = 180;
+      doc.fontSize(11)
+         .font('Helvetica-Bold')
+         .fillColor('black')
+         .text(quote.client_name, 60, clientY);
+      
+      clientY += 20;
       if (quote.client_company) {
-        doc.text(quote.client_company, 50, 235);
+        doc.fontSize(10)
+           .font('Helvetica')
+           .fillColor('#444')
+           .text(quote.client_company, 60, clientY);
+        clientY += 18;
       }
       
       if (quote.client_email) {
-        doc.text(`Email: ${quote.client_email}`, 50, 250);
+        doc.fontSize(9)
+           .fillColor('#666')
+           .text(`Email: ${quote.client_email}`, 60, clientY);
+        clientY += 15;
       }
       
       if (quote.client_phone) {
-        doc.text(`Tel: ${quote.client_phone}`, 50, 265);
+        doc.text(`Teléfono: ${quote.client_phone}`, 60, clientY);
       }
 
       // Tabla de productos
-      let yPos = 310;
+      let yPos = 300;
       
-      // Header tabla
+      // Header tabla con fondo
+      doc.fillColor('#0066cc')
+         .rect(50, yPos, 500, 25)
+         .fill();
+      
       doc.fontSize(10)
          .font('Helvetica-Bold')
-         .text('Producto', 50, yPos)
-         .text('Cant.', 280, yPos)
-         .text('P. Unit.', 350, yPos)
-         .text('Total', 470, yPos);
+         .fillColor('white')
+         .text('Producto', 60, yPos + 8)
+         .text('Cant.', 330, yPos + 8)
+         .text('Precio Unit.', 390, yPos + 8)
+         .text('Total', 490, yPos + 8);
       
-      doc.moveTo(50, yPos + 15)
-         .lineTo(550, yPos + 15)
-         .stroke();
-      
-      yPos += 25;
+      yPos += 30;
 
-      // Items
+      // Items con líneas alternas
       doc.font('Helvetica')
-         .fontSize(9);
+         .fontSize(10);
       
+      let alternate = false;
       items.forEach(item => {
-        if (yPos > 680) {
+        if (yPos > 670) {
           doc.addPage();
           yPos = 50;
+          alternate = false;
         }
         
-        doc.text(item.name, 50, yPos, { width: 220 });
-        doc.text(item.quantity.toString(), 280, yPos);
-        doc.text(formatCurrency(item.price), 350, yPos);
-        doc.text(formatCurrency(item.quantity * item.price), 470, yPos);
+        // Fondo alternado
+        if (alternate) {
+          doc.fillColor('#f8f9fa')
+             .rect(50, yPos - 5, 500, 35)
+             .fill();
+        }
+        
+        doc.fillColor('black')
+           .font('Helvetica-Bold')
+           .text(item.name, 60, yPos, { width: 250, lineBreak: false });
+        
+        doc.font('Helvetica')
+           .text(item.quantity.toString(), 330, yPos)
+           .text(formatCurrency(item.price), 390, yPos)
+           .font('Helvetica-Bold')
+           .text(formatCurrency(item.quantity * item.price), 490, yPos);
         
         if (item.description) {
           yPos += 15;
           doc.fontSize(8)
+             .font('Helvetica')
              .fillColor('#666')
-             .text(item.description, 50, yPos, { width: 220 });
+             .text(item.description, 60, yPos, { width: 250 });
           doc.fillColor('black')
-             .fontSize(9);
+             .fontSize(10);
+          yPos += 10;
         }
         
         yPos += 30;
+        alternate = !alternate;
       });
 
-      // Totales
-      yPos += 10;
-      doc.fontSize(10);
+      // Línea separadora antes de totales
+      doc.strokeColor('#dee2e6')
+         .moveTo(380, yPos)
+         .lineTo(550, yPos)
+         .stroke();
+      
+      yPos += 15;
+
+      // Totales con mejor formato
+      doc.fontSize(10)
+         .font('Helvetica')
+         .fillColor('#666');
       
       doc.text('Subtotal:', 400, yPos);
-      doc.text(formatCurrency(quote.subtotal), 470, yPos);
+      doc.fillColor('black')
+         .text(formatCurrency(quote.subtotal), 490, yPos, { align: 'right' });
       
       yPos += 20;
-      doc.text('IVA (16%):', 400, yPos);
-      doc.text(formatCurrency(quote.tax), 470, yPos);
+      doc.fillColor('#666')
+         .text('IVA (16%):', 400, yPos);
+      doc.fillColor('black')
+         .text(formatCurrency(quote.tax), 490, yPos, { align: 'right' });
       
-      yPos += 20;
+      yPos += 25;
+      
+      // Caja de total
+      doc.fillColor('#0066cc')
+         .rect(380, yPos - 5, 170, 30)
+         .fill();
+      
       doc.fontSize(12)
          .font('Helvetica-Bold')
-         .text('TOTAL:', 400, yPos);
-      doc.text(formatCurrency(quote.total), 470, yPos);
+         .fillColor('white')
+         .text('TOTAL:', 390, yPos + 5);
+      doc.fontSize(14)
+         .text(formatCurrency(quote.total), 480, yPos + 5);
 
-      // Notas
+      // Sección de notas
       if (quote.notes) {
-        yPos += 40;
+        yPos += 50;
         if (yPos > 650) {
           doc.addPage();
           yPos = 50;
         }
         
-        doc.fontSize(10)
+        doc.fillColor('#0066cc')
+           .fontSize(11)
            .font('Helvetica-Bold')
-           .text('NOTAS:', 50, yPos);
+           .text('NOTAS Y OBSERVACIONES:', 50, yPos);
+        
+        doc.fillColor('#f8f9fa')
+           .rect(50, yPos + 20, 500, 80)
+           .fill()
+           .strokeColor('#dee2e6')
+           .rect(50, yPos + 20, 500, 80)
+           .stroke();
         
         doc.fontSize(9)
            .font('Helvetica')
-           .text(quote.notes, 50, yPos + 20, { width: 500 });
+           .fillColor('#444')
+           .text(quote.notes, 60, yPos + 30, { width: 480 });
       }
+
+      // Condiciones al final de la página
+      doc.fontSize(8)
+         .fillColor('#666')
+         .text(`Vigencia de la cotización: ${quote.validity_days} días`, 50, 720)
+         .text(`Tiempo de entrega: ${quote.delivery_time}`, 50, 735)
+         .text(`Condiciones de pago: ${quote.payment_terms}`, 50, 750);
 
       // Nueva página para datos bancarios
       doc.addPage();
       
-      doc.fontSize(14)
+      // Header de página 2
+      doc.fillColor('#0066cc')
+         .rect(0, 0, doc.page.width, 80)
+         .fill();
+      
+      doc.fillColor('white')
+         .fontSize(20)
          .font('Helvetica-Bold')
-         .text('DATOS BANCARIOS', 50, 50);
+         .text('DATOS BANCARIOS', 50, 30);
       
+      // Caja de información bancaria
+      doc.fillColor('#f8f9fa')
+         .rect(50, 120, 500, 180)
+         .fill()
+         .strokeColor('#dee2e6')
+         .rect(50, 120, 500, 180)
+         .stroke();
+      
+      let bankY = 140;
+      doc.fontSize(12)
+         .font('Helvetica-Bold')
+         .fillColor('#0066cc')
+         .text('Información para transferencias:', 60, bankY);
+      
+      bankY += 30;
+      doc.fontSize(11)
+         .fillColor('black')
+         .text('Banco:', 60, bankY);
+      doc.font('Helvetica')
+         .text('BBVA Bancomer', 200, bankY);
+      
+      bankY += 25;
+      doc.font('Helvetica-Bold')
+         .text('Titular:', 60, bankY);
+      doc.font('Helvetica')
+         .text('Integrational 3 S.A. de C.V.', 200, bankY);
+      
+      bankY += 25;
+      doc.font('Helvetica-Bold')
+         .text('Cuenta:', 60, bankY);
+      doc.font('Helvetica')
+         .text('0123456789', 200, bankY);
+      
+      bankY += 25;
+      doc.font('Helvetica-Bold')
+         .text('CLABE:', 60, bankY);
+      doc.font('Helvetica')
+         .text('012345678901234567', 200, bankY);
+      
+      // Nota de agradecimiento
       doc.fontSize(10)
-         .font('Helvetica')
-         .text('Banco: BBVA Bancomer', 50, 80)
-         .text('Titular: Integrational 3 S.A. de C.V.', 50, 100)
-         .text('Cuenta: 0123456789', 50, 120)
-         .text('CLABE: 012345678901234567', 50, 140);
-      
-      doc.fontSize(9)
          .fillColor('#666')
-         .text(`Tiempo de entrega: ${quote.delivery_time}`, 50, 180)
-         .text(`Condiciones de pago: ${quote.payment_terms}`, 50, 200);
+         .font('Helvetica-Oblique')
+         .text('Gracias por su preferencia. Para cualquier duda o aclaración, no dude en contactarnos.', 50, 350, {
+           width: 500,
+           align: 'center'
+         });
 
       doc.end();
       
