@@ -1,4 +1,4 @@
-export default function Dashboard({ user, onLogout, currentView, onNewQuote, onViewList, onViewUsers, onViewClients, onViewProducts, children }) {
+export default function Dashboard({ user, onLogout, currentView, onNewQuote, onViewList, onViewUsers, onViewClients, onViewProducts, onViewImport, children }) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Profesional */}
@@ -110,6 +110,19 @@ export default function Dashboard({ user, onLogout, currentView, onNewQuote, onV
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
               <span>Productos</span>
+            </button>
+            <button
+              onClick={onViewImport}
+              className={`px-6 py-3.5 font-semibold transition-all duration-200 flex items-center space-x-2 ${
+                currentView === 'import'
+                  ? 'bg-white text-blue-600 rounded-t-lg shadow-lg'
+                  : 'text-white hover:bg-white/10 rounded-t-lg'
+              }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              <span>Importar Datos</span>
             </button>
           </div>
         </div>

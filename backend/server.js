@@ -8,6 +8,7 @@ import quotesRoutes from './routes/quotes.js';
 import usersRoutes from './routes/users.js';
 import clientsRoutes from './routes/clients.js';
 import productsRoutes from './routes/products.js';
+import importRoutes from './routes/import.js';
 import { initDatabase } from './database/init.js';
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.use('/api/quotes', quotesRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/clients', clientsRoutes);
 app.use('/api/products', productsRoutes);
+app.use('/api/import', importRoutes);
 
 // Ruta de prueba
 app.get('/api/health', (req, res) => {

@@ -6,6 +6,7 @@ import QuoteList from './components/QuoteList';
 import UserManagement from './components/UserManagement';
 import ClientManagement from './components/ClientManagement';
 import ProductManagement from './components/ProductManagement';
+import ImportData from './components/ImportData';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -62,6 +63,7 @@ function App() {
         onViewUsers={() => setCurrentView('users')}
         onViewClients={() => setCurrentView('clients')}
         onViewProducts={() => setCurrentView('products')}
+        onViewImport={() => setCurrentView('import')}
       >
         {currentView === 'form' ? (
           <QuoteForm 
@@ -75,6 +77,8 @@ function App() {
           <ClientManagement />
         ) : currentView === 'products' ? (
           <ProductManagement />
+        ) : currentView === 'import' ? (
+          <ImportData />
         ) : (
           <QuoteList 
             onNewQuote={handleNewQuote}
