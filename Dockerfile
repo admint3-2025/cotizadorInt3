@@ -36,8 +36,10 @@ WORKDIR /usr/src/app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci && npm cache clean --force
+# Install dependencies and Puppeteer Chrome
+RUN npm ci && \
+    npx puppeteer browsers install chrome && \
+    npm cache clean --force
 
 # Copy application files
 COPY . .
