@@ -74,11 +74,12 @@ router.post('/', async (req, res) => {
 
     const result = await query(
       `INSERT INTO clients (name, company, email, phone, address, city, state, zip_code, rfc, contact_person, notes, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       RETURNING id`,
       [name, company, email, phone, address, city, state, zip_code, rfc, contact_person, notes, req.user.id]
     );
 
-    const newClient = await getOne('SELECT * FROM clients WHERE id = $1', [result.lastID]);
+    const newClient = await getOne('SELECT * FROM clients WHERE id = $1', [result.rows[0].id]);
 
     res.status(201).json(newClient);
   } catch (error) {
@@ -110,10 +111,10 @@ router.put('/:id', async (req, res) => {
 
     await query(
       `UPDATE clients 
-       SET name = ?, company = ?, email = ?, phone = ?, address = ?, 
-           city = ?, state = ?, zip_code = ?, rfc = ?, contact_person = ?, 
-           notes = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
+       SET name = $1, company = $2, email = $3, phone = $4, address = $5, 
+           city = $6, state = $7, zip_code = $8, rfc = $9, contact_person = $10, 
+           notes = $11, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $12`,
       [name, company, email, phone, address, city, state, zip_code, rfc, contact_person, notes, req.params.id]
     );
 

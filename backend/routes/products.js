@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
     `;
     
     if (active_only === 'true') {
-      query += ' WHERE p.is_active = 1';
+      query += ' WHERE p.is_active = TRUE';
     }
     
     query += ' ORDER BY p.name ASC';
@@ -88,14 +88,15 @@ router.post('/', async (req, res) => {
       `INSERT INTO products (
         code, name, description, category, unit_price, cost, stock, 
         unit, is_service, tax_rate, notes, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      RETURNING id`,
       [
         code, name, description, category, unit_price, cost || 0, stock || 0,
-        unit || 'Pieza', is_service ? 1 : 0, tax_rate || 16.0, notes, req.user.id
+        unit || 'Pieza', is_service, tax_rate || 16.0, notes, req.user.id
       ]
     );
 
-    const newProduct = await getOne('SELECT * FROM products WHERE id = $1', [result.lastID]);
+    const newProduct = await getOne('SELECT * FROM products WHERE id = $1', [result.rows[0].id]);
 
     res.status(201).json(newProduct);
   } catch (error) {
@@ -130,13 +131,13 @@ router.put('/:id', async (req, res) => {
 
     await query(
       `UPDATE products 
-       SET code = ?, name = ?, description = ?, category = ?, unit_price = ?, 
-           cost = ?, stock = ?, unit = ?, is_service = ?, is_active = ?, 
-           tax_rate = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
+       SET code = $1, name = $2, description = $3, category = $4, unit_price = $5, 
+           cost = $6, stock = $7, unit = $8, is_service = $9, is_active = $10, 
+           tax_rate = $11, notes = $12, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $13`,
       [
         code, name, description, category, unit_price, cost || 0, stock || 0,
-        unit || 'Pieza', is_service ? 1 : 0, is_active ? 1 : 0, 
+        unit || 'Pieza', is_service, is_active, 
         tax_rate || 16.0, notes, req.params.id
       ]
     );
