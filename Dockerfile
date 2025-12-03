@@ -1,10 +1,10 @@
 # Use Debian base with Node.js
 FROM node:20-bookworm
 
-# Install Chromium from system packages
+# Install dependencies and download Chrome directly from Google
 RUN apt-get update && apt-get install -y \
-    chromium \
-    chromium-driver \
+    wget \
+    gnupg \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
@@ -30,9 +30,11 @@ RUN apt-get update && apt-get install -y \
     libxtst6 \
     ca-certificates \
     --no-install-recommends \
+    && wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && apt-get install -y ./google-chrome-stable_current_amd64.deb \
+    && rm google-chrome-stable_current_amd64.deb \
     && rm -rf /var/lib/apt/lists/* \
-    && which chromium || echo "Chromium not found!" \
-    && ls -la /usr/bin/chromium* || echo "No chromium executables found"
+    && google-chrome --version
 
 # Set working directory
 WORKDIR /usr/src/app
