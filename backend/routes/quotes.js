@@ -83,14 +83,15 @@ router.post('/', async (req, res) => {
         folio, client_id, client_name, client_company, client_email, client_phone,
         client_address, items, subtotal, tax, total, notes,
         validity_days, delivery_time, payment_terms, template_type, created_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+      RETURNING id
     `, [
       folio, client_id || null, client_name, client_company, client_email, client_phone,
       client_address, JSON.stringify(items), subtotal, tax, total, notes,
       validity_days, delivery_time, payment_terms, template_type, req.user.id
     ]);
 
-    const quote = await getOne('SELECT * FROM quotes WHERE id = $1', [result.lastID]);
+    const quote = await getOne('SELECT * FROM quotes WHERE id = $1', [result.rows[0].id]);
 
     // Enviar por email si se solicita
     if (send_email) {
@@ -182,7 +183,7 @@ router.delete('/:id', async (req, res) => {
         quote_id, folio, client_name, client_company, client_email, total,
         created_by, created_by_name, created_at, deleted_at, deleted_by, deleted_by_name,
         deletion_reason, full_data
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, CURRENT_TIMESTAMP, $10, $11, $12, $13)
     `, [
       quote.id,
       quote.folio,
