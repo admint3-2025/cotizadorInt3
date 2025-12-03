@@ -1,8 +1,10 @@
 # Use Debian base with Node.js
 FROM node:20-bookworm
 
-# Install Chromium dependencies (not Chromium itself, Puppeteer will download it)
+# Install Chromium from system packages
 RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-sandbox \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
@@ -33,16 +35,12 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /usr/src/app
 
-# Set Puppeteer cache directory to a location within the app
-ENV PUPPETEER_CACHE_DIR=/usr/src/app/.cache/puppeteer
-
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies and Puppeteer Chrome
-RUN npm ci && \
-    PUPPETEER_CACHE_DIR=/usr/src/app/.cache/puppeteer npx puppeteer browsers install chrome && \
-    npm cache clean --force
+# Install dependencies (skip Puppeteer's Chromium download)
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+RUN npm ci && npm cache clean --force
 
 # Copy application files
 COPY . .

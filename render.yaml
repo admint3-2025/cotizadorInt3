@@ -28,8 +28,6 @@ services:
         generateValue: true
       - key: PORT
         value: 10000
-      - key: PUPPETEER_CACHE_DIR
-        value: /usr/src/app/.cache/puppeteer
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT
