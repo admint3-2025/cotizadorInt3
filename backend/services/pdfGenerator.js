@@ -349,7 +349,7 @@ export async function generatePDF(quote) {
 
   console.log('🌐 Iniciando navegador...');
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: 'new',
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -357,10 +357,11 @@ export async function generatePDF(quote) {
       '--disable-accelerated-2d-canvas',
       '--no-first-run',
       '--no-zygote',
-      '--single-process',
-      '--disable-gpu'
+      '--disable-gpu',
+      '--disable-web-security',
+      '--disable-features=IsolateOrigins,site-per-process'
     ],
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || process.env.CHROME_BIN || undefined
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome-stable'
   });
   
   console.log('📃 Generando página...');
