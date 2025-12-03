@@ -140,13 +140,21 @@ router.post('/:id/send', async (req, res) => {
 // Descargar PDF de cotización
 router.get('/:id/pdf', async (req, res) => {
   try {
+    console.log('📥 Solicitando PDF para cotización:', req.params.id);
+    
     const quote = await getOne('SELECT * FROM quotes WHERE id = $1', [req.params.id]);
     
     if (!quote) {
+      console.log('❌ Cotización no encontrada:', req.params.id);
       return res.status(404).json({ error: 'Cotización no encontrada' });
     }
 
+    console.log('✅ Cotización encontrada:', quote.folio);
+    console.log('🎨 Generando PDF...');
+    
     const pdfBuffer = await generatePDF(quote);
+    
+    console.log('✅ PDF generado exitosamente, tamaño:', pdfBuffer.length, 'bytes');
     
     res.writeHead(200, {
       'Content-Type': 'application/pdf',
@@ -155,8 +163,13 @@ router.get('/:id/pdf', async (req, res) => {
     });
     res.end(pdfBuffer);
   } catch (error) {
-    console.error('Error al generar PDF:', error);
-    res.status(500).json({ error: 'Error al generar PDF' });
+    console.error('❌ Error completo al generar PDF:', error);
+    console.error('Stack trace:', error.stack);
+    res.status(500).json({ 
+      error: 'Error al generar PDF',
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
