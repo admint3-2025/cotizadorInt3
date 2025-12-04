@@ -59,30 +59,34 @@ export default function ImportData() {
     }
   };
 
-  const downloadTemplate = () => {
-    const token = localStorage.getItem('token');
-    const url = `${API_URL}/api/import/template/${importType}`;
-    
-    fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`
+  const downloadTemplate = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const url = `${API_URL}/api/import/template/${importType}`;
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al descargar plantilla');
       }
-    })
-    .then(response => response.blob())
-    .then(blob => {
-      const url = window.URL.createObjectURL(blob);
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = downloadUrl;
       a.download = `plantilla_${importType === 'clients' ? 'clientes' : 'productos'}.csv`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(downloadUrl);
       document.body.removeChild(a);
-    })
-    .catch(error => {
+    } catch (error) {
       console.error('Error:', error);
-      alert('Error al descargar plantilla');
-    });
+      alert('Error al descargar plantilla: ' + error.message);
+    }
   };
 
   return (
