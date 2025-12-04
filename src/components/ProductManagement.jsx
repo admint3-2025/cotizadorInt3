@@ -284,10 +284,16 @@ export default function ProductManagement() {
                       <p className="text-sm text-gray-500">💰 Precio Venta</p>
                       <p className="font-bold text-green-600 text-lg">{formatCurrency(product.unit_price)}</p>
                     </div>
+                    <div>
+                      <p className="text-sm text-gray-500">💵 Costo</p>
+                      <p className="font-medium text-gray-700">{product.cost > 0 ? formatCurrency(product.cost) : 'No registrado'}</p>
+                    </div>
                     {product.cost > 0 && (
                       <div>
-                        <p className="text-sm text-gray-500">💵 Costo</p>
-                        <p className="font-medium text-gray-700">{formatCurrency(product.cost)}</p>
+                        <p className="text-sm text-gray-500">📈 Margen</p>
+                        <p className="font-medium text-blue-600">
+                          {((((product.unit_price - product.cost) / product.unit_price) * 100).toFixed(1))}%
+                        </p>
                       </div>
                     )}
                     {!product.is_service && (
@@ -435,6 +441,23 @@ export default function ProductManagement() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Costo (opcional)
+                  </label>
+                  <input
+                    type="number"
+                    name="cost"
+                    value={formData.cost}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    min="0"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    placeholder="Costo de adquisición"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Para calcular margen de ganancia</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Precio de Venta *
                   </label>
                   <input
@@ -447,21 +470,11 @@ export default function ProductManagement() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
                   />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Costo
-                  </label>
-                  <input
-                    type="number"
-                    name="cost"
-                    value={formData.cost}
-                    onChange={handleInputChange}
-                    step="0.01"
-                    min="0"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
+                  {formData.cost > 0 && formData.unit_price > 0 && (
+                    <p className="text-xs text-blue-600 mt-1 font-medium">
+                      Margen: {((((formData.unit_price - formData.cost) / formData.unit_price) * 100).toFixed(1))}%
+                    </p>
+                  )}
                 </div>
               </div>
 

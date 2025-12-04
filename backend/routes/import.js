@@ -132,15 +132,16 @@ router.post('/products', upload.single('file'), async (req, res) => {
             await query(`
               INSERT INTO products (
                 code, name, description, specs, 
-                unit_price, category, stock, 
+                unit_price, cost, category, stock, 
                 is_active, created_by
-              ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+              ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
             `, [
               row.code,
               row.name,
               row.description || null,
               row.specs || null,
               parseFloat(row.unit_price),
+              row.cost ? parseFloat(row.cost) : null,
               row.category || null,
               parseInt(row.stock || 0),
               row.is_active === 'false' || row.is_active === '0' ? false : true,
@@ -188,8 +189,8 @@ router.get('/template/clients', (req, res) => {
 
 // Descargar plantilla CSV para productos
 router.get('/template/products', (req, res) => {
-  const csv = 'code,name,description,specs,unit_price,category,stock,is_active\n' +
-              'PROD-001,Producto Ejemplo,Descripción del producto,Especificaciones técnicas,1500.00,Categoría A,100,true\n';
+  const csv = 'code,name,description,specs,unit_price,cost,category,stock,is_active\n' +
+              'PROD-001,Producto Ejemplo,Descripción del producto,Especificaciones técnicas,1500.00,1000.00,Categoría A,100,true\n';
   
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename=plantilla_productos.csv');
