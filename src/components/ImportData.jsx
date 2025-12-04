@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Upload, Download, FileText, Users, Package, AlertCircle, CheckCircle } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 export default function ImportData() {
   const [importType, setImportType] = useState('clients');
   const [file, setFile] = useState(null);
@@ -31,7 +33,7 @@ export default function ImportData() {
       formData.append('file', file);
 
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/import/${importType}`, {
+      const response = await fetch(`${API_URL}/api/import/${importType}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -59,7 +61,7 @@ export default function ImportData() {
 
   const downloadTemplate = () => {
     const token = localStorage.getItem('token');
-    const url = `http://localhost:3000/api/import/template/${importType}`;
+    const url = `${API_URL}/api/import/template/${importType}`;
     
     fetch(url, {
       headers: {
