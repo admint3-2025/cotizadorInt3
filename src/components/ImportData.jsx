@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Upload, Download, FileText, Users, Package, AlertCircle, CheckCircle } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// En producción, usar la misma URL base. En desarrollo, usar localhost:3000
+const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3000' : '');
 
 export default function ImportData() {
   const [importType, setImportType] = useState('clients');
